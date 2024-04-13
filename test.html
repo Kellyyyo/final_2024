@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="./vue.min.js"></script>
+    <link href="./css/test.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+    <div class="home" id="home">
+        <div class="nav" >
+            <div class="web_name">
+                网站名字
+            </div>
+            <div class="web_nav">
+                <span><a href="./index.html">关于我们</a></span>
+                <span><a href="./test.html">音乐测试</a></span>
+                <span><a href="./result.html">测试结果</a></span>
+            </div>
+        </div>
+        <div class="m_question" v-if="isName">
+            <div class="title">
+                {{question.num}}. {{question.title}}
+            </div>
+            <div class="select">
+                <div class="sel first" @click="selquestion(1)">
+                    {{question.A}}
+                </div>
+                <div class="sel second" @click="selquestion(2)">
+                 
+                    {{question.B}}
+                </div>
+            </div>
+        </div>
+        <div class="bg-img"  v-if="isName">
+            <img src="./img/2.png" alt="">
+        </div>
+        <div class="t_name m_question" v-if="!isName">
+            <div class="t_title">
+                请输入你的名字：
+            </div>
+            <div class="t_input">
+                <input type="text" v-model="username">
+                <span @click="sure()">OK</span>
+            </div>
+        </div>
+
+        <!-- <div class="m_answer" v-if="flag">
+            <div class="a_type">您是一个喜欢 <span>{{answer.type}}</span></div>
+            <div class="a_content">{{answer.content}}</div>
+            <div class="a_title">以下是为您推荐的歌单：</div>
+            <div class="a_songs">
+                <div class="a_songContent" v-for="(item,index) in songs">
+                    <span><span class="a_title">歌单名称：</span>{{item.name}}</span>
+                    <span><span class="a_title">链接：</span>{{"https://"+item.link}}</span>
+                    <span><span class="a_title">作者：</span>{{item.username}}</span>
+                    <span><span class="a_title">播放量：</span>{{item.nums}}次</span>
+                </div>
+            </div>
+            <div class="a_button">
+                <button @click="remake()">重新测试</button>
+            </div>
+        </div> -->
+    </div>
+    <script>
+        var questions = [
+            {
+                title: "相较于有烟火气的深夜大排档，你更喜欢带有音乐的餐厅?",
+                A: "是的",
+                B: "不是",
+                Ato: 3,
+                Bto: 2
+            },
+            {
+                title: "在家打扫卫生时，你会选择?",
+                A: "随机点开甄嬛传/琅琊榜的某一集",
+                B: "播放自己喜欢的歌单",
+                Ato: 4,
+                Bto: 3
+            },
+            {
+                title: "下辈子如果可以选择的话，你想成为?",
+                A: "动物",
+                B: "植物",
+                Ato: 4,
+                Bto: 5
+            },
+            {
+                title: "如果只能养一只宠物，你会选择哪一种?",
+                A: "猫",
+                B: "狗",
+                Ato: 5,
+                Bto: 6
+            },
+            {
+                title: "在和朋友出去旅行时，你是?",
+                A: "“严格遵循计划”的人",
+                B: " “怎么样都行”的人",
+                Ato: 6,
+                Bto: 7
+            },
+            {
+                title: "当一个人在公共场合发表了令人厌恶的言论，你会?",
+                A: "在心里骂ta",
+                B: "当场骂ta",
+                Ato: 7,
+                Bto: 9
+            },
+            {
+                title: "你是否有过因为听到一首歌而流泪的经历?",
+                A: "有",
+                B: "没有",
+                Ato: 9,
+                Bto: 11
+            },
+            {
+                title: "遇到特别喜欢的歌曲，你会?",
+                A: "独自欣赏",
+                B: "分享给朋友",
+                Ato: 10,
+                Bto: 9
+            },
+            {
+                title: "听歌时，你的状态是?",
+                A: "面无表情，冷酷地听",
+                B: "幻想自己是歌手，开始唱跳rap",
+                Ato: 10,
+                Bto: 11
+            },
+            {
+                title: "你认为自己的歌声?",
+                A: "天籁之音",
+                B: "五音不全",
+                Ato: "B",
+                Bto: "C",
+                isAnswer: true
+            },
+            {
+                title: " 比起一群人去K歌，你更喜欢一个人去K歌?",
+                A: "是的",
+                B: "不是",
+                Ato: "A",
+                Bto: "D",
+                isAnswer: true
+            },
+        ]
+        var answers = new Map([
+            ["A", { type: "蓝调型", content: "你是一个理性的人</br>你喜欢把事情规划的很好</br>你在很多时候要比一般人懂得如何进行自我反省，自我沉淀</br>从而留下对自己非常重要的东西，对自己的目标非常明确，会果断抛弃一些糟糕的东西。" }],
+            ["B", { type: "摇滚型", content: "你喜欢冒险，愿意和别人走不一样的路</br>你需要依靠着以摇滚的形式来发泄自己心中的诸多情绪</br>你会时常感到迷茫和不安，需要有一个人领导着逐渐找回已经丧失的自我</br>你很喜欢与一些志同道合的人交往，享受充满未知的生活。" }],
+            ["C", { type: "轻音乐型", content: "你是一个十分敏感类型的人</br>你对一些问题常会表现出过分的关心</br>你为人比较圆滑、世故和老练、沉稳，不会轻易动怒</br>你的性格比较温和、亲切，攻击性欲望并不强</br>你比较喜欢一种稳定和富足的生活。" }],
+            ["D", { type: "电子型", content: "你做事更倾向于凭着感觉出发</br>你喜欢自由的，无拘束的生活，希望能够摆脱控制自己的一切</br>你对生活往往是追求其丰富多彩，同时你的适应能力也很强</br>你的音乐品味也不尽相同，你喜欢用不同的曲风来匹配当下的场合或心境。" }]
+        ])
+        var ld = [
+            {
+                "nums": "84271.0",
+                "name": "学习听蓝调 | 在知识的海洋中畅游",
+                "link": "music.163.com/playlist?id=8216636486",
+                "username": "网易云音乐"
+            },
+            {
+                "nums": "75791.0",
+                "name": "向布鲁斯大师致敬",
+                "link": "music.163.com/playlist?id=453254091",
+                "username": "浪潮1917-RedSoul"
+            },
+            {
+                "nums": "64614.0",
+                "name": "Joe Bonamassa",
+                "link": "music.163.com/playlist?id=720260187",
+                "username": "黑衣大叔不撸斯"
+            },
+            {
+                "nums": "45463.0",
+                "name": "蓝调（Blues）起源与发展",
+                "link": "music.163.com/playlist?id=120744925",
+                "username": "帐号已注销"
+            },
+            {
+                "nums": "43598.0",
+                "name": "布鲁斯蓝调，深情酒馆",
+                "link": "music.163.com/playlist?id=414017504",
+                "username": "来我厨房"
+            },
+            {
+                "nums": "27248.0",
+                "name": "布鲁斯大师全集【Blues】",
+                "link": "music.163.com/playlist?id=1990818550",
+                "username": "想和你去吹吹风丶"
+            },
+            {
+                "nums": "26777.0",
+                "name": "「深情布鲁斯」诉说惆怅之情",
+                "link": "music.163.com/playlist?id=397384062",
+                "username": "虎子Tora"
+            },
+            {
+                "nums": "25089.0",
+                "name": "100blues大师-布鲁斯是他们的生命",
+                "link": "music.163.com/playlist?id=102463641",
+                "username": "浪潮1917-RedSoul"
+            },
+            {
+                "nums": "24043.0",
+                "name": "蓝调自习室 | 默默努力才能惊艳众人",
+                "link": "music.163.com/playlist?id=8548901211",
+                "username": "洛十九v"
+            },
+            {
+                "nums": "19915.0",
+                "name": "Shuffle！探寻布鲁斯律动的秘密",
+                "link": "music.163.com/playlist?id=2149916902",
+                "username": "来我厨房"
+            }
+        ]
+        var dz = [
+            {
+                "nums": "97787.0",
+                "name": "Robo-Funk | 你的popping练习曲",
+                "link": "music.163.com/playlist?id=8445043200",
+                "username": "云音乐官方歌单"
+            },
+            {
+                "nums": "96983.0",
+                "name": "电子浪漫暴击 | 电音节奏下的极致浪漫",
+                "link": "music.163.com/playlist?id=8502131200",
+                "username": "云音乐电音星球"
+            },
+            {
+                "nums": "96513.0",
+                "name": "Italo Disco | 热舞迪厅 复古伊泰洛",
+                "link": "music.163.com/playlist?id=8550658201",
+                "username": "云音乐电音星球"
+            },
+            {
+                "nums": "95165.0",
+                "name": "Armada Trance | A厂迷幻舞曲精选",
+                "link": "music.163.com/playlist?id=8458409200",
+                "username": "云音乐电音星球"
+            },
+            {
+                "nums": "87847.0",
+                "name": "超燃运动BGM | 电子氛围下急速暴汗·Hi-Res",
+                "link": "music.163.com/playlist?id=8548059200",
+                "username": "云音乐电音星球"
+            },
+            {
+                "nums": "84666.0",
+                "name": "电音合辑 | 为你定制的电音必听曲",
+                "link": "music.163.com/playlist?id=8408317200",
+                "username": "云音乐电音星球"
+            },
+            {
+                "nums": "82281.0",
+                "name": "House 2023 | 年度最热浩室舞曲盘点",
+                "link": "music.163.com/playlist?id=8903997200",
+                "username": "云音乐电音星球"
+            },
+            {
+                "nums": "81587.0",
+                "name": "Future Garage | 未来幻境 氛围迷雾",
+                "link": "music.163.com/playlist?id=8548857202",
+                "username": "云音乐电音星球"
+            },
+            {
+                "nums": "77726.0",
+                "name": "Dance Pop | 全球最新流行舞曲指南",
+                "link": "music.163.com/playlist?id=8728078201",
+                "username": "云音乐电音星球"
+            },
+            {
+                "nums": "71866.0",
+                "name": "Brostep | 炸裂贝斯 美式回响",
+                "link": "music.163.com/playlist?id=8533092205",
+                "username": "云音乐电音星球"
+            }
+        ]
+        var yg = [
+            {
+                "nums": "98628.0",
+                "name": "后摇阅览室 | 沉入浩瀚书海",
+                "link": "music.163.com/playlist?id=8640833200",
+                "username": "云音乐HIFI享受"
+            },
+            {
+                "nums": "97900.0",
+                "name": "Soundcloud最热摇滚 | 时下热门摇滚精选速速get",
+                "link": "music.163.com/playlist?id=9451071202",
+                "username": "云音乐摇滚专区"
+            },
+            {
+                "nums": "80376.0",
+                "name": "华语摇滚经典 | 与时代经典激情碰撞",
+                "link": "music.163.com/playlist?id=8716182202",
+                "username": "云音乐摇滚专区"
+            },
+            {
+                "nums": "73843.0",
+                "name": "德国摇滚 | 纵情燃烧一切平庸与腐朽",
+                "link": "music.163.com/playlist?id=8713016204",
+                "username": "云音乐摇滚专区"
+            },
+            {
+                "nums": "71331.0",
+                "name": "冲浪摇滚 | 悠闲中的澎湃浪潮",
+                "link": "music.163.com/playlist?id=6834512858",
+                "username": "云音乐摇滚专区"
+            },
+            {
+                "nums": "70963.0",
+                "name": "盯鞋摇滚 | 漂浮的迷人噪音",
+                "link": "music.163.com/playlist?id=5461451708",
+                "username": "云音乐摇滚专区"
+            },
+            {
+                "nums": "67280.0",
+                "name": "日系可燃物 | 直达“燃点”，舞力全开",
+                "link": "music.163.com/playlist?id=7481017927",
+                "username": "云音乐摇滚专区"
+            },
+            {
+                "nums": "61487.0",
+                "name": "运动进行时 | 动感瘦身能量",
+                "link": "music.163.com/playlist?id=8412053562",
+                "username": "云音乐歌单之友"
+            },
+            {
+                "nums": "57938.0",
+                "name": "中秋快乐 | 月亮总是照着我们",
+                "link": "music.163.com/playlist?id=6975250863",
+                "username": "云音乐摇滚专区"
+            },
+            {
+                "nums": "53866.0",
+                "name": "摇滚公路跑 | 唤醒每寸运动神经",
+                "link": "music.163.com/playlist?id=8865183200",
+                "username": "云音乐摇滚专区"
+            }
+        ]
+        var qyy = [
+    {
+        "nums": "90966.0",
+        "name": "专注纯音乐 | 音符流动的静谧",
+        "link": "music.163.com/playlist?id=8760373071",
+        "username": "韩知心i"
+    },
+    {
+        "nums": "76857.0",
+        "name": "纯净音符 | 轻松自在的时光",
+        "link": "music.163.com/playlist?id=8449795217",
+        "username": "云音乐歌单之友"
+    },
+    {
+        "nums": "75930.0",
+        "name": "久石让作曲纯音 | 充满童话色彩和生命力",
+        "link": "music.163.com/playlist?id=9199646201",
+        "username": "云音乐歌单之友"
+    },
+    {
+        "nums": "74407.0",
+        "name": "阳光瑜伽 | 来一场晨光里的习练吧",
+        "link": "music.163.com/playlist?id=8451465355",
+        "username": "云音乐歌单之友"
+    },
+    {
+        "nums": "74176.0",
+        "name": "不熄灯宿舍 | 舒缓节拍助力深夜刷题",
+        "link": "music.163.com/playlist?id=8597656202",
+        "username": "云音乐官方歌单"
+    },
+    {
+        "nums": "68983.0",
+        "name": "伤感轻音乐 | 倾听旋律中涌动的心绪",
+        "link": "music.163.com/playlist?id=8756933205",
+        "username": "云音乐歌单之友"
+    },
+    {
+        "nums": "67248.0",
+        "name": "深度学习 | 纯音精选",
+        "link": "music.163.com/playlist?id=8409991680",
+        "username": "云音乐歌单之友"
+    },
+    {
+        "nums": "67129.0",
+        "name": "吉卜力动漫纯音 | 宫崎骏画笔下的温暖治愈",
+        "link": "music.163.com/playlist?id=9197661203",
+        "username": "云音乐官方歌单"
+    },
+    {
+        "nums": "63696.0",
+        "name": "原声乐器试音碟 | 极致还原乐器细节",
+        "link": "music.163.com/playlist?id=8448080200",
+        "username": "云音乐歌单之友"
+    },
+    {
+        "nums": "60396.0",
+        "name": "学习必备 | 唤醒大脑",
+        "link": "music.163.com/playlist?id=8409991563",
+        "username": "云音乐歌单之友"
+    }
+]
+        // 将vue挂载到id为home的根元素上
+        var vm = new Vue({
+            el: "#home",
+            data() {
+                return {
+                    question: {
+                        num: 1,
+                        title: "",
+                        A: "",
+                        B: "",
+                        Ato: '',
+                        Bto: ''
+                    },
+                    answer: {
+                        type: "",
+                        content: ""
+                    },
+                    songs: [],
+                    flag:false,
+                    isName:false,
+                    username:""
+                };
+            },
+            mounted() {
+                this.init()
+                this.isName=false;
+            },
+            methods: {
+                selquestion(sel) {
+                    if (this.question.isAnswer) {
+                        this.flag=true
+                        if (sel == 1) {
+                            this.result(this.question.Ato)
+                        } else {
+                            this.result(this.question.Bto)
+                        }
+                        
+                    } else {
+                        if (sel == 1) {
+                            this.changeQuestion(this.question.Ato)
+                        } else {
+                            this.changeQuestion(this.question.Bto)
+                        }
+                    }
+                },
+                changeQuestion(to) {
+                    let num = this.question.num + 1
+                    this.question = questions[to - 1]
+                    this.question.num = num
+                },
+                init() {
+                    this.question = questions[0]
+                    this.question.num = 1;
+                    localStorage.setItem("username",null)
+                    localStorage.setItem("answer",null)
+                    localStorage.setItem("songs",null)
+                },
+                sure(){
+                    localStorage.setItem("username",this.username)
+                    this.isName=true;
+                },
+                result(answer) {
+                    switch (answer) {
+                        case "A":
+                            this.answer=answers.get("A");
+                            this.songs = ld;
+                            break;
+                        case "B":
+                            this.answer=answers.get("B");
+                            this.songs = yg;
+                            break;
+                        case "C":
+                            this.answer=answers.get("C");
+                            this.songs = qyy;
+                            break;
+                        case "D":
+                            this.answer=answers.get("D");
+                            this.songs = dz;
+                            break;
+                    }
+                    localStorage.setItem("answer",JSON.stringify(this.answer) )
+                    localStorage.setItem("songs",JSON.stringify(this.songs))
+                    location.href = "./result.html";
+                },
+                remake(){
+                    this.init()
+                    this.flag=false
+                }
+
+            },
+
+            created() { },
+        });
+    </script>
+
+</body>
+
+</html>

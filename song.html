@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="./vue.min.js"></script>
+    <link href="./css/song.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+    <div class="home" id="home">
+        <div class="nav" >
+            <div class="web_name">
+                网站名字
+            </div>
+            <div class="web_nav">
+                <span><a href="./index.html">关于我们</a></span>
+                <span><a href="./test.html">音乐测试</a></span>
+                <span><a href="./result.html">测试结果</a></span>
+            </div>
+        </div>
+        <div class="main">
+            <div class="left">
+                <div class="title">
+                    {{answer.type}}你适合...
+                </div>
+                <div class="songs">
+                    <div class="item" v-for="(item,index) in songs" >
+                        <span class="songnum">{{index+1}}</span><span @click="jump(index)">{{item.name}}</span>
+                    </div>
+                </div>
+                <div class="bottom">
+                    进入为你推荐的社区吧!
+                </div>
+            </div>
+            <div class="right">
+                <img src="./img/1.png" alt="">
+            </div>
+            
+        </div>
+        
+    </div>
+    <script>
+        var vm = new Vue({
+            el: "#home",
+            data() {
+                return {
+                    username:'',
+                    answer:"",
+                    songs:[]
+                }
+            },
+            mounted() {
+                this.username=(localStorage.getItem("username")) 
+                this.answer=JSON.parse(localStorage.getItem("answer"))
+                this.songs=JSON.parse(localStorage.getItem("songs"))
+            },
+            methods: {
+                jump(index){
+                    window.open("https://"+this.songs[index].link)
+                   
+                }
+            },
+
+        })    
+    </script>
+</body>
+</html>

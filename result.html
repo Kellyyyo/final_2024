@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="./vue.min.js"></script>
+    <link href="./css/result.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+    <div class="home" id="home">
+        <div class="nav" >
+            <div class="web_name">
+                网站名字
+            </div>
+            <div class="web_nav">
+                <span><a href="./index.html">关于我们</a></span>
+                <span><a href="./test.html">音乐测试</a></span>
+                <span><a href="./result.html">测试结果</a></span>
+            </div>
+        </div>
+        <div class="m_content">
+            <div class="left">
+                <div class="l_name">
+                    {{username}}，原来你是...
+                </div>
+                <div class="l_type">
+                    <span class="l_first"> {{answer.type}}</span>
+                    <span class="l_text">人格！</span>
+                </div>
+            </div>
+            <div class="circle_1"></div>
+            <div class="circle_2"></div>
+            <div class="right" v-html="answer.content">
+            </div>
+            
+        </div>
+        <button class="btn">
+            <span @click="location.href='./song.html'">你的歌单</span>
+        </button>
+    </div>
+    <script>
+        var vm = new Vue({
+            el: "#home",
+            data() {
+                return {
+                    username:'',
+                    answer:"",
+                }
+            },
+            mounted() {
+                this.username=(localStorage.getItem("username")) 
+                this.answer=JSON.parse(localStorage.getItem("answer"))
+                if(this.answer==null||this.username==null){
+                    alert("请先完成测试")
+                    location.href="./test.html"
+                } 
+            },
+            methods:{
+
+            },
+
+        })    
+    </script>
+</body>
+</html>
